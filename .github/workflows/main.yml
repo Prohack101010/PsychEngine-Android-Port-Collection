@@ -1,0 +1,33 @@
+name: Build Psych Engine
+
+on: workflow_dispatch
+
+jobs:
+  Build:
+    name: ${{ matrix.name }}
+    strategy:
+      matrix:
+        include:
+          - name: Android-Arm64
+            os: ubuntu-24.04
+            buildArgs: "android -ONLY_ARM64 -final"
+            setupCommand: sh ./setup/mobile.sh
+            artifactName: androidBuild-Arm64
+            artifactPath: "export/release/android/bin/app/build/outputs/apk/release/*.apk"
+            system: Android
+          - name: Android-Armv7
+            os: ubuntu-24.04
+            buildArgs: "android -ONLY_ARMV7 -final"
+            setupCommand: sh ./setup/mobile.sh
+            artifactName: androidBuild-Armv7
+            artifactPath: "export/release/android/bin/app/build/outputs/apk/release/*.apk"
+            system: Android
+    uses: ./.github/workflows/build.yml
+    with:
+        name: ${{ matrix.name }}
+        os: ${{ matrix.os }}
+        buildArgs: ${{ matrix.buildArgs }}
+        setupCommand: ${{ matrix.setupCommand }}
+        artifactName: ${{ matrix.artifactName }}
+        artifactPath: ${{ matrix.artifactPath }}
+        system: ${{ matrix.system }}
