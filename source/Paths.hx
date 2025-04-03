@@ -9,6 +9,7 @@ import flixel.FlxSprite;
 #if MODS_ALLOWED
 import sys.io.File;
 import sys.FileSystem;
+import flixel.graphics.FlxGraphic;
 import openfl.display.BitmapData;
 #end
 
@@ -20,9 +21,9 @@ class Paths
 
 	#if MODS_ALLOWED
 		#if (haxe >= "4.0.0")
-		public static var customImagesLoaded:Map<String, BitmapData> = new Map();
+		public static var customImagesLoaded:Map<String, FlxGraphic> = new Map();
 		#else
-		public static var customImagesLoaded:Map<String, BitmapData> = new Map<String, openfl.display.BitmapData>();
+		public static var customImagesLoaded:Map<String, FlxGraphic> = new Map<String, FlxGraphic>();
 		#end
 	#end
 	static var currentLevel:String;
@@ -39,13 +40,12 @@ class Paths
 
 		if (currentLevel != null)
 		{
-			var levelPath = getLibraryPathForce(file, currentLevel + '_high');
-			if (!ClientPrefs.lowQuality && OpenFlAssets.exists(levelPath, type))
-				return levelPath;
-
-			levelPath = getLibraryPathForce(file, currentLevel);
-			if (OpenFlAssets.exists(levelPath, type))
-				return levelPath;
+			var levelPath:String = '';
+			if(currentLevel != 'shared') {
+				levelPath = getLibraryPathForce(file, currentLevel);
+				if (OpenFlAssets.exists(levelPath, type))
+					return levelPath;
+			}
 
 			levelPath = getLibraryPathForce(file, "shared");
 			if (OpenFlAssets.exists(levelPath, type))
@@ -123,12 +123,8 @@ class Paths
 	inline static public function image(key:String, ?library:String):Dynamic
 	{
 		#if MODS_ALLOWED
-		if(FileSystem.exists(modsImages(key))) {
-			if(!customImagesLoaded.exists(key)) {
-				customImagesLoaded.set(key, BitmapData.fromFile(modsImages(key)));
-			}
-			return customImagesLoaded.get(key);
-		}
+		var imageToReturn:FlxGraphic = addCustomGraphic(key);
+		if(imageToReturn != null) return imageToReturn;
 		#end
 		return getPath('images/$key.png', IMAGE, library);
 	}
@@ -144,13 +140,12 @@ class Paths
 
 		if (currentLevel != null)
 		{
-			var levelPath = getLibraryPathForce(key, currentLevel + '_high');
-			if (!ClientPrefs.lowQuality && FileSystem.exists(levelPath))
-				return File.getContent(levelPath);
-
-			levelPath = getLibraryPathForce(key, currentLevel);
-			if (FileSystem.exists(levelPath))
-				return File.getContent(levelPath);
+			var levelPath:String = '';
+			if(currentLevel != 'shared') {
+				levelPath = getLibraryPathForce(key, currentLevel);
+				if (FileSystem.exists(levelPath))
+					return File.getContent(levelPath);
+			}
 
 			levelPath = getLibraryPathForce(key, 'shared');
 			if (FileSystem.exists(levelPath))
@@ -179,17 +174,31 @@ class Paths
 		return false;
 	}
 
+	public static function readDirectory(directory:String):Array<String>
+  	{
+  		#if MODS_ALLOWED
+  		return FileSystem.readDirectory(directory);
+  		#else
+  		var dirs:Array<String> = [];
+  		for(dir in Assets.list().filter(folder -> folder.startsWith(directory)))
+  		{
+  			@:privateAccess
+  			for(library in lime.utils.Assets.libraries.keys())
+  			{
+  				if(library != 'default' && Assets.exists('$library:$dir') && (!dirs.contains('$library:$dir') || !dirs.contains(dir)))
+  					dirs.push('$library:$dir');
+  				else if(Assets.exists(dir) && !dirs.contains(dir))
+  					dirs.push(dir);
+  			}
+  		}
+  		return dirs;
+  		#end
+  	}
+
 	inline static public function getSparrowAtlas(key:String, ?library:String)
 	{
 		#if MODS_ALLOWED
-		var imageLoaded:BitmapData = null;
-		if(FileSystem.exists(modsImages(key))) {
-			if(!customImagesLoaded.exists(key)) {
-				customImagesLoaded.set(key, BitmapData.fromFile(modsImages(key)));
-			}
-			imageLoaded = customImagesLoaded.get(key);
-		}
-		
+		var imageLoaded:FlxGraphic = addCustomGraphic(key);
 		var xmlExists:Bool = false;
 		if(FileSystem.exists(modsXml(key))) {
 			xmlExists = true;
@@ -200,39 +209,11 @@ class Paths
 		return FlxAtlasFrames.fromSparrow(image(key, library), file('images/$key.xml', library));
 		#end
 	}
-	
-	public static function readDirectory(directory:String):Array<String>
- 	{
- 		#if MODS_ALLOWED
- 		return FileSystem.readDirectory(directory);
- 		#else
- 		var dirs:Array<String> = [];
- 		for(dir in Assets.list().filter(folder -> folder.startsWith(directory)))
- 		{
- 			@:privateAccess
- 			for(library in lime.utils.Assets.libraries.keys())
- 			{
- 				if(library != 'default' && Assets.exists('$library:$dir') && (!dirs.contains('$library:$dir') || !dirs.contains(dir)))
- 					dirs.push('$library:$dir');
- 				else if(Assets.exists(dir) && !dirs.contains(dir))
- 					dirs.push(dir);
- 			}
- 		}
- 		return dirs;
- 		#end
- 	}
 
 	inline static public function getPackerAtlas(key:String, ?library:String)
 	{
 		#if MODS_ALLOWED
-		var imageLoaded:BitmapData = null;
-		if(FileSystem.exists(modsImages(key))) {
-			if(!customImagesLoaded.exists(key)) {
-				customImagesLoaded.set(key, BitmapData.fromFile(modsImages(key)));
-			}
-			imageLoaded = customImagesLoaded.get(key);
-		}
-		
+		var imageLoaded:FlxGraphic = addCustomGraphic(key);
 		var txtExists:Bool = false;
 		if(FileSystem.exists(modsTxt(key))) {
 			txtExists = true;
@@ -245,6 +226,18 @@ class Paths
 	}
 	
 	#if MODS_ALLOWED
+	static private function addCustomGraphic(key:String):FlxGraphic {
+		if(FileSystem.exists(modsImages(key))) {
+			if(!customImagesLoaded.exists(key)) {
+				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(modsImages(key)));
+				newGraphic.persist = true;
+				customImagesLoaded.set(key, newGraphic);
+			}
+			return customImagesLoaded.get(key);
+		}
+		return null;
+	}
+
 	inline static public function mods(key:String) {
 		return Sys.getCwd() + 'mods/' + key;
 	}

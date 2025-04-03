@@ -236,19 +236,19 @@ class ChartingState extends MusicBeatState
 		UI_box.x = FlxG.width / 2 + GRID_SIZE / 2;
 		UI_box.y = 25;
 
-        #if mobile
-  		var tipText:FlxText = new FlxText(UI_box.x, UI_box.y + UI_box.height + 30, 0,
-  			"UP/Down - Change Conductor's strum time
-  			\nLeft/Right - Go to the previous/next section
-  			\nHold C + move 4x faster
-  			\nHold X to move 10x faster
-  			\nV/D - Zoom in/out
-  			\n
-  			\nA - Test your chart
-  			\nUP/Down(Right Side) - Decrease/Increase Note Sustain Length
-  			\nY - Stop/Resume song
-  			\nZ - Reset section", 16);
-  		#else
+		#if mobile
+		var tipText:FlxText = new FlxText(UI_box.x, UI_box.y + UI_box.height + 30, 0,
+			"UP/Down - Change Conductor's strum time
+			\nLeft/Right - Go to the previous/next section
+			\nHold C + move 4x faster
+			\nHold X to move 10x faster
+			\nV/D - Zoom in/out
+			\n
+			\nA - Test your chart
+			\nUP/Down(Right Side) - Decrease/Increase Note Sustain Length
+			\nY - Stop/Resume song
+			\nZ - Reset section", 16);
+		#else
 		var tipText:FlxText = new FlxText(UI_box.x, UI_box.y + UI_box.height + 6, 0,
 			"W/S or Mouse Wheel - Change Conductor's strum time
 			\nA or Left/D or Right - Go to the previous/next section
@@ -289,7 +289,7 @@ class ChartingState extends MusicBeatState
 		zoomTxt = new FlxText(10, 10, 0, "Zoom: 1x", 16);
 		zoomTxt.scrollFactor.set();
 		add(zoomTxt);
-		
+
 		addVirtualPad("CHART_EDITOR", "CHART_EDITOR");
 		super.create();
 	}
@@ -1039,24 +1039,24 @@ class ChartingState extends MusicBeatState
 				}
 				LoadingState.loadAndSwitchState(new PlayState());
 			}
-			
+
 			if (_virtualpad.buttonB.justPressed || FlxG.keys.justPressed.BACKSPACE)
- 			{
- 				FlxG.mouse.visible = false;
- 				FlxG.sound.music.stop();
- 				if(vocals != null) vocals.stop();
- 
- 				var songName:String = PlayState.SONG.song.toLowerCase();
- 				for (week in 0...WeekData.songsNames.length) {
- 					var weekSongs:Array<String> = WeekData.songsNames[week];
- 					for (i in 0...weekSongs.length) {
- 						if(weekSongs[i].toLowerCase() == songName) {
- 							PlayState.storyWeek = week;
- 						}
- 					}
- 				}
- 				LoadingState.loadAndSwitchState(new PlayState());
- 			}
+			{
+				FlxG.mouse.visible = false;
+				FlxG.sound.music.stop();
+				if(vocals != null) vocals.stop();
+
+				var songName:String = PlayState.SONG.song.toLowerCase();
+				for (week in 0...WeekData.songsNames.length) {
+					var weekSongs:Array<String> = WeekData.songsNames[week];
+					for (i in 0...weekSongs.length) {
+						if(weekSongs[i].toLowerCase() == songName) {
+							PlayState.storyWeek = week;
+						}
+					}
+				}
+				LoadingState.loadAndSwitchState(new PlayState());
+			}
 
 			if(curSelectedNote != null && curSelectedNote[1] > -1) {
 				if (_virtualpad.buttonE.justPressed || FlxG.keys.justPressed.E)
@@ -1136,7 +1136,7 @@ class ChartingState extends MusicBeatState
 				FlxG.sound.music.pause();
 
 				var holdingShift:Float = 1;
-  				if (FlxG.keys.pressed.SHIFT || _virtualpad.buttonY.pressed) holdingShift = 3;
+   				if (FlxG.keys.pressed.SHIFT || _virtualpad.buttonY.pressed) holdingShift = 3;
 				var daTime:Float = 700 * FlxG.elapsed * holdingShift;
 
 				if (_virtualpad.buttonUp.pressed || FlxG.keys.pressed.W)
@@ -1154,9 +1154,9 @@ class ChartingState extends MusicBeatState
 
 			var shiftThing:Int = 1;
 			if (_virtualpad.buttonC.pressed || FlxG.keys.pressed.SHIFT)
- 				shiftThing = 4;			
- 			if (_virtualpad.buttonX.pressed)
-  				shiftThing = 10;
+  				shiftThing = 4;			
+  			if (_virtualpad.buttonX.pressed)
+   				shiftThing = 10;
 
 			if ((FlxG.keys.justPressed.RIGHT || FlxG.keys.justPressed.D) || (_virtualpad.buttonRight.justPressed))
 				changeSection(curSection + shiftThing);
@@ -1742,7 +1742,7 @@ class ChartingState extends MusicBeatState
 			"song": _song
 		};
 
-		var data:String = Json.stringify(json, "\t");
+    var data:String = Json.stringify(json, "\t");
 
 		if ((data != null) && (data.length > 0))
 		{

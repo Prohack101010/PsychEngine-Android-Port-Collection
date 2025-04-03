@@ -22,7 +22,7 @@ class FlashingState extends MusicBeatState
 
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		add(bg);
-		
+
 		final buttonENTER = #if mobile 'A' #else 'ENTER' #end;
 		final buttonESCAPE = #if mobile 'B' #else 'ESCAPE' #end;
 		final You = "You've"; //I'm lazy :|
@@ -37,7 +37,7 @@ class FlashingState extends MusicBeatState
 		warnText.setFormat("VCR OSD Mono", 32, FlxColor.WHITE, CENTER);
 		warnText.screenCenter(Y);
 		add(warnText);
-		
+
 		addVirtualPad('NONE', 'A_B');
 		addVirtualPadCamera();
 	}

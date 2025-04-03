@@ -24,7 +24,7 @@ class MusicBeatState extends FlxUIState
 
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
-
+	
 	public static var checkHitbox:Bool = false;
  	public var _virtualpad:FlxVirtualPad;
  	public static var mobilec:MobileControls;

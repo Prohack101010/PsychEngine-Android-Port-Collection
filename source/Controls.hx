@@ -378,7 +378,7 @@ class Controls extends FlxActionSet
 		setKeyboardScheme(scheme, false);
 	}
 	#end
-	
+
 	public var trackedInputsUI:Array<FlxActionInput> = [];
 	public var trackedInputsNOTES:Array<FlxActionInput> = [];
 	
@@ -774,16 +774,16 @@ class Controls extends FlxActionSet
 		#end
 	}
 	#else
- 	public function bindKeys(control:Control, keys:Array<FlxKey>)
-  	{
-  		inline forEachBound(control, (action, state) -> addKeys(action, keys, state));
-  	}
-  
-  	public function unbindKeys(control:Control, keys:Array<FlxKey>)
-  	{
-  		inline forEachBound(control, (action, _) -> removeKeys(action, keys));
-  	}
-  	#end
+  	public function bindKeys(control:Control, keys:Array<FlxKey>)
+   	{
+   		inline forEachBound(control, (action, state) -> addKeys(action, keys, state));
+   	}
+
+   	public function unbindKeys(control:Control, keys:Array<FlxKey>)
+   	{
+   		inline forEachBound(control, (action, _) -> removeKeys(action, keys));
+   	}
+   	#end
 
 	inline static function addKeys(action:FlxActionDigital, keys:Array<FlxKey>, state:FlxInputState)
 	{

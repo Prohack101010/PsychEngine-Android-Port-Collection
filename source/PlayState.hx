@@ -49,12 +49,13 @@ using StringTools;
 
 class PlayState extends MusicBeatState
 {
-    #if LUA_VIRTUALPAD
-    public var luaVirtualPad:FlxVirtualPad;
-    #end
-    public static var instance:PlayState;
-    
+	#if LUA_VIRTUALPAD
+	public var luaVirtualPad:FlxVirtualPad;
+	#end
+	public static var instance:PlayState;
+
 	public static var STRUM_X = 42;
+	public static var STRUM_X_MIDDLESCROLL = -278;
 
 	public static var ratingStuff:Array<Dynamic> = [
 		['You Suck!', 0.2], //From 0% to 19%
@@ -154,7 +155,9 @@ class PlayState extends MusicBeatState
 	public var camHUD:FlxCamera;
 	public var camGame:FlxCamera;
 	public var camOther:FlxCamera;
+	#if LUA_VIRTUALPAD
 	public var luaVpadCam:FlxCamera;
+	#end
 
 	var dialogue:Array<String> = ['blah blah blah', 'coolswag'];
 
@@ -234,22 +237,22 @@ class PlayState extends MusicBeatState
 			FlxG.sound.music.stop();
 
 		// for lua
-		instance = this;
+ 		instance = this;
 
 		practiceMode = false;
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
 		camOther = new FlxCamera();
-		luaVpadCam = new FlxCamera();
+		#if LUA_VIRTUALPAD luaVpadCam = new FlxCamera(); #end
 		camHUD.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
-		luaVpadCam.bgColor.alpha = 0;
+		#if LUA_VIRTUALPAD luaVpadCam.bgColor.alpha = 0; #end
 
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD);
 		FlxG.cameras.add(camOther);
-		FlxG.cameras.add(luaVpadCam, false);
+		#if LUA_VIRTUALPAD FlxG.cameras.add(luaVpadCam, false); #end
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 
 		FlxCamera.defaultCameras = [camGame];
@@ -712,22 +715,22 @@ class PlayState extends MusicBeatState
 
 		Conductor.songPosition = -5000;
 
-		strumLine = new FlxSprite(STRUM_X, 50).makeGraphic(FlxG.width, 10);
+		strumLine = new FlxSprite(ClientPrefs.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X, 50).makeGraphic(FlxG.width, 10);
 		if(ClientPrefs.downScroll) strumLine.y = FlxG.height - 150;
 		strumLine.scrollFactor.set();
 
-		timeTxt = new FlxText(strumLine.x + (strumLine.width / 2) - 248, strumLine.y - 30, 400, "", 32);
+		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 20, 400, "", 32);
 		timeTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timeTxt.scrollFactor.set();
 		timeTxt.alpha = 0;
 		timeTxt.borderSize = 2;
-		timeTxt.visible = !ClientPrefs.hideHud;
+		timeTxt.visible = !ClientPrefs.hideTime;
 		if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 45;
 
 		timeBarBG = new FlxSprite(timeTxt.x, timeTxt.y + (timeTxt.height / 4)).loadGraphic(Paths.image('timeBar'));
 		timeBarBG.scrollFactor.set();
 		timeBarBG.alpha = 0;
-		timeBarBG.visible = !ClientPrefs.hideHud;
+		timeBarBG.visible = !ClientPrefs.hideTime;
 		timeBarBG.color = FlxColor.BLACK;
 		add(timeBarBG);
 
@@ -737,7 +740,7 @@ class PlayState extends MusicBeatState
 		timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
 		timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
 		timeBar.alpha = 0;
-		timeBar.visible = !ClientPrefs.hideHud;
+		timeBar.visible = !ClientPrefs.hideTime;
 		add(timeBar);
 		add(timeTxt);
 
@@ -797,7 +800,6 @@ class PlayState extends MusicBeatState
 		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
 			'health', 0, 2);
 		healthBar.scrollFactor.set();
-		healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
 		// healthBar
 		healthBar.visible = !ClientPrefs.hideHud;
 		add(healthBar);
@@ -812,6 +814,7 @@ class PlayState extends MusicBeatState
 		iconP2.y = healthBar.y - (iconP2.height / 2);
 		iconP2.visible = !ClientPrefs.hideHud;
 		add(iconP2);
+		reloadHealthBarColors();
 
 		scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 20);
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -845,8 +848,8 @@ class PlayState extends MusicBeatState
 		doof.cameras = [camHUD];
 
 		addMobileControls();
-     	MusicBeatState.mobilec.visible = false;
-     	MusicBeatState.mobilec.alpha = 0.000001;
+		MusicBeatState.mobilec.visible = false;
+		MusicBeatState.mobilec.alpha = 0.000001;
 
 		// if (SONG.song == 'South')
 		// FlxG.camera.alpha = 0.7;
@@ -956,6 +959,12 @@ class PlayState extends MusicBeatState
 		DiscordClient.changePresence(detailsText, displaySongName + " (" + storyDifficultyText + ")", iconP2.getCharacter());
 		#end
 		super.create();
+	}
+	
+	public function reloadHealthBarColors() {
+		healthBar.createFilledBar(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]),
+			FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]));
+		healthBar.updateBar();
 	}
 
 	public function addCharacterToList(newCharacter:String, type:Int) {
@@ -1113,8 +1122,8 @@ class PlayState extends MusicBeatState
 		inCutscene = false;
 		var ret:Dynamic = callOnLuas('onStartCountdown', []);
 		if(ret != FunkinLua.Function_Stop) {
-		    MusicBeatState.mobilec.visible = true;
-     	    if (MusicBeatState.checkHitbox != true) MusicBeatState.mobilec.alpha = ClientPrefs.VirtualPadAlpha;
+			MusicBeatState.mobilec.visible = true;
+			if (MusicBeatState.checkHitbox != true) MusicBeatState.mobilec.alpha = ClientPrefs.VirtualPadAlpha;
 
 			generateStaticArrows(0);
 			generateStaticArrows(1);
@@ -1125,6 +1134,7 @@ class PlayState extends MusicBeatState
 			for (i in 0...opponentStrums.length) {
 				setOnLuas('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
 				setOnLuas('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
+				if(ClientPrefs.middleScroll) opponentStrums.members[i].visible = false;
 			}
 
 			startedCountdown = true;
@@ -1469,7 +1479,7 @@ class PlayState extends MusicBeatState
 		for (i in 0...4)
 		{
 			// FlxG.log.add(i);
-			var babyArrow:StrumNote = new StrumNote(STRUM_X, strumLine.y, i);
+			var babyArrow:StrumNote = new StrumNote(ClientPrefs.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X, strumLine.y, i);
 
 			switch (curStage)
 			{
@@ -2032,9 +2042,13 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		var roundedSpeed:Float = FlxMath.roundDecimal(SONG.speed, 2);
 		if (unspawnNotes[0] != null)
 		{
-			if (unspawnNotes[0].strumTime - Conductor.songPosition < 1500)
+			var time:Float = 1500;
+			if(roundedSpeed < 1) time /= roundedSpeed;
+
+			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
 			{
 				var dunceNote:Note = unspawnNotes[0];
 				notes.add(dunceNote);
@@ -2046,11 +2060,15 @@ class PlayState extends MusicBeatState
 
 		if (generatedMusic)
 		{
-			var roundedSpeed:Float = FlxMath.roundDecimal(SONG.speed, 2);
 			var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
 			notes.forEachAlive(function(daNote:Note)
 			{
-				if (daNote.y > FlxG.height)
+				if(!daNote.mustPress && ClientPrefs.middleScroll)
+				{
+					daNote.active = true;
+					daNote.visible = false;
+				}
+				else if (daNote.y > FlxG.height)
 				{
 					daNote.active = false;
 					daNote.visible = false;
@@ -2510,6 +2528,7 @@ class PlayState extends MusicBeatState
 					case 2: char = gf;
 				}
 				char.idleSuffix = value2;
+				char.recalculateDanceIdle();
 
 			case 'Screen Shake':
 				var valuesArray:Array<String> = [value1, value2];
@@ -2658,7 +2677,7 @@ class PlayState extends MusicBeatState
 	var transitioning = false;
 	function endSong():Void
 	{
-	    MusicBeatState.mobilec.visible = false;
+		MusicBeatState.mobilec.visible = false;
 		timeBarBG.visible = false;
 		timeBar.visible = false;
 		timeTxt.visible = false;
@@ -2805,7 +2824,7 @@ class PlayState extends MusicBeatState
 
 	private function popUpScore(note:Note = null):Void
 	{
-		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + 10); 
+		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + 8); 
 
 		// boyfriend.playAnim('hey');
 		vocals.volume = 1;
@@ -2832,7 +2851,7 @@ class PlayState extends MusicBeatState
 			daRating = 'bad';
 			score = 100;
 		}
-		else if (noteDiff > Conductor.safeZoneOffset * 0.2)
+		else if (noteDiff > Conductor.safeZoneOffset * 0.25)
 		{
 			daRating = 'good';
 			score = 200;
@@ -3443,12 +3462,12 @@ class PlayState extends MusicBeatState
 			luaArray[i].stop();
 		}
 		super.destroy();
-		
+
 		#if LUA_VIRTUALPAD
 		if (luaVirtualPad != null)
-			luaVirtualPad = FlxDestroyUtil.destroy(luaVirtualPad);
-		#end
-		instance = null;
+ 			luaVirtualPad = FlxDestroyUtil.destroy(luaVirtualPad);
+ 		#end
+ 		instance = null;
 	}
 
 	var lastStepHit:Int = -1;
@@ -3721,44 +3740,44 @@ class PlayState extends MusicBeatState
 
 	var curLight:Int = 0;
 	var curLightEvent:Int = 0;
-	
+
 	#if LUA_VIRTUALPAD
 	public function makeLuaVirtualPad(DPad:String, Action:String)
-	{
-	    if(members.contains(luaVirtualPad)) return;
-
-		luaVirtualPad = new FlxVirtualPad(DPad, Action);
-		luaVirtualPad.alpha = ClientPrefs.VirtualPadAlpha;
-	}
-	
-	public function addLuaVirtualPad() {
-		if(luaVirtualPad == null || members.contains(luaVirtualPad)) return;
-
-		var target:Dynamic = PlayState.instance;
-		target.insert(target.members.length + 1, luaVirtualPad);
-	}
-	
-	public function addLuaVirtualPadCamera()
-	{
-		if(luaVirtualPad != null)
-		    luaVirtualPad.cameras = [luaVpadCam];
-	}
-	
-	public function removeLuaVirtualPad()
-	{			
-		if (luaVirtualPad != null) {
-			luaVirtualPad.kill();
-			luaVirtualPad.destroy();
-			remove(luaVirtualPad);
-			luaVirtualPad = null;
-		}
-	}
-	
-	public static function checkVPadPress(buttonPostfix:String, type = 'justPressed') {
-		var buttonName = "button" + buttonPostfix;
-		var button = Reflect.getProperty(PlayState.instance.luaVirtualPad, buttonName); //Access Spesific LuaVirtualPad Button
-		return Reflect.getProperty(button, type);
-		return false;
-	}
-	#end
+ 	{
+ 	    if(members.contains(luaVirtualPad)) return;
+ 
+ 		luaVirtualPad = new FlxVirtualPad(DPad, Action);
+ 		luaVirtualPad.alpha = ClientPrefs.VirtualPadAlpha;
+ 	}
+ 	
+ 	public function addLuaVirtualPad() {
+ 		if(luaVirtualPad == null || members.contains(luaVirtualPad)) return;
+ 
+ 		var target:Dynamic = PlayState.instance;
+ 		target.insert(target.members.length + 1, luaVirtualPad);
+ 	}
+ 	
+ 	public function addLuaVirtualPadCamera()
+ 	{
+ 		if(luaVirtualPad != null)
+ 		    luaVirtualPad.cameras = [luaVpadCam];
+ 	}
+ 	
+ 	public function removeLuaVirtualPad()
+ 	{			
+ 		if (luaVirtualPad != null) {
+ 			luaVirtualPad.kill();
+ 			luaVirtualPad.destroy();
+ 			remove(luaVirtualPad);
+ 			luaVirtualPad = null;
+ 		}
+ 	}
+ 	
+ 	public static function checkVPadPress(buttonPostfix:String, type = 'justPressed') {
+ 		var buttonName = "button" + buttonPostfix;
+ 		var button = Reflect.getProperty(PlayState.instance.luaVirtualPad, buttonName); //Access Spesific LuaVirtualPad Button
+ 		return Reflect.getProperty(button, type);
+ 		return false;
+ 	}
+ 	#end
 }
