@@ -78,7 +78,11 @@ class Character extends FlxSprite
 	{
 		super(x, y);
 
+		#if (haxe >= "4.0.0")
+		animOffsets = new Map();
+		#else
 		animOffsets = new Map<String, Array<Dynamic>>();
+		#end
 		curCharacter = character;
 		this.isPlayer = isPlayer;
 		antialiasing = ClientPrefs.globalAntialiasing;
@@ -234,10 +238,10 @@ class Character extends FlxSprite
 			}
 		}
 
-		if(animation.getByName('idleHair') != null && animation.curAnim.finished)
+		if(animation.getByName('idleHair' + idleSuffix) != null && animation.curAnim.finished)
 		{
-			if(animation.curAnim.name == 'idle')
-				playAnim('idleHair');
+			if(animation.curAnim.name == 'idle' + idleSuffix)
+				playAnim('idleHair' + idleSuffix);
 			else if(animation.curAnim.name.startsWith('sing') && !animation.curAnim.name.startsWith('miss'))
 				playAnim(animation.curAnim.name, false, false, animation.curAnim.frames.length - hairFramesLoop);
 		}

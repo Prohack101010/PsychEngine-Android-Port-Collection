@@ -7,6 +7,7 @@ echo Makking the main haxelib and setuping folder in same time..
 haxelib setup ~/haxelib
 echo Installing dependencies...
 echo This might take a few moments depending on your internet speed.
+haxelib git linc_luajit https://github.com/PsychExtendedThings/linc_luajit --quiet
 haxelib install flixel 5.5.0 --quiet
 haxelib install flixel-addons 3.2.2 --quiet
 haxelib install flixel-ui 2.4.0 --quiet

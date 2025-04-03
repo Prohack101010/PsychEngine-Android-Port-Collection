@@ -39,11 +39,11 @@ class Paths
 
 		if (currentLevel != null)
 		{
-			var levelPath = getLibraryPathForce(file, currentLevel);
-			if (OpenFlAssets.exists(levelPath, type))
+			var levelPath = getLibraryPathForce(file, currentLevel + '_high');
+			if (!ClientPrefs.lowQuality && OpenFlAssets.exists(levelPath, type))
 				return levelPath;
 
-			levelPath = getLibraryPathForce(file, currentLevel + '_high');
+			levelPath = getLibraryPathForce(file, currentLevel);
 			if (OpenFlAssets.exists(levelPath, type))
 				return levelPath;
 
@@ -90,6 +90,11 @@ class Paths
 		return getPath('data/$key.json', TEXT, library);
 	}
 
+	inline static public function lua(key:String, ?library:String)
+	{
+		return getPath('$key.lua', TEXT, library);
+	}
+
 	static public function sound(key:String, ?library:String)
 	{
 		return getPath('sounds/$key.$SOUND_EXT', SOUND, library);
@@ -126,6 +131,33 @@ class Paths
 		}
 		#end
 		return getPath('images/$key.png', IMAGE, library);
+	}
+	
+	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
+	{
+		#if sys
+		if (!ignoreMods && FileSystem.exists(mods(key)))
+			return File.getContent(mods(key));
+
+		if (FileSystem.exists(getPreloadPath(key)))
+			return File.getContent(getPreloadPath(key));
+
+		if (currentLevel != null)
+		{
+			var levelPath = getLibraryPathForce(key, currentLevel + '_high');
+			if (!ClientPrefs.lowQuality && FileSystem.exists(levelPath))
+				return File.getContent(levelPath);
+
+			levelPath = getLibraryPathForce(key, currentLevel);
+			if (FileSystem.exists(levelPath))
+				return File.getContent(levelPath);
+
+			levelPath = getLibraryPathForce(key, 'shared');
+			if (FileSystem.exists(levelPath))
+				return File.getContent(levelPath);
+		}
+		#end
+		return Assets.getText(getPath(key, TEXT));
 	}
 
 	inline static public function font(key:String)
@@ -170,25 +202,25 @@ class Paths
 	}
 	
 	public static function readDirectory(directory:String):Array<String>
-	{
-		#if MODS_ALLOWED
-		return FileSystem.readDirectory(directory);
-		#else
-		var dirs:Array<String> = [];
-		for(dir in Assets.list().filter(folder -> folder.startsWith(directory)))
-		{
-			@:privateAccess
-			for(library in lime.utils.Assets.libraries.keys())
-			{
-				if(library != 'default' && Assets.exists('$library:$dir') && (!dirs.contains('$library:$dir') || !dirs.contains(dir)))
-					dirs.push('$library:$dir');
-				else if(Assets.exists(dir) && !dirs.contains(dir))
-					dirs.push(dir);
-			}
-		}
-		return dirs;
-		#end
-	}
+ 	{
+ 		#if MODS_ALLOWED
+ 		return FileSystem.readDirectory(directory);
+ 		#else
+ 		var dirs:Array<String> = [];
+ 		for(dir in Assets.list().filter(folder -> folder.startsWith(directory)))
+ 		{
+ 			@:privateAccess
+ 			for(library in lime.utils.Assets.libraries.keys())
+ 			{
+ 				if(library != 'default' && Assets.exists('$library:$dir') && (!dirs.contains('$library:$dir') || !dirs.contains(dir)))
+ 					dirs.push('$library:$dir');
+ 				else if(Assets.exists(dir) && !dirs.contains(dir))
+ 					dirs.push(dir);
+ 			}
+ 		}
+ 		return dirs;
+ 		#end
+ 	}
 
 	inline static public function getPackerAtlas(key:String, ?library:String)
 	{
@@ -214,7 +246,7 @@ class Paths
 	
 	#if MODS_ALLOWED
 	inline static public function mods(key:String) {
-		return 'mods/' + key;
+		return Sys.getCwd() + 'mods/' + key;
 	}
 	inline static public function modsImages(key:String) {
 		return mods('images/' + key + '.png');

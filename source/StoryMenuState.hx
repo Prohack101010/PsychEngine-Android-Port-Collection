@@ -214,8 +214,8 @@ class StoryMenuState extends MusicBeatState
 
 		changeWeek();
 
-        addVirtualPad("FULL", "A_B_C");
-        
+		addVirtualPad("FULL", "A_B_C");
+
 		super.create();
 	}
 
@@ -224,7 +224,7 @@ class StoryMenuState extends MusicBeatState
 		changeWeek();
 		super.closeSubState();
 		removeVirtualPad();
- 		addVirtualPad("FULL", "A_B_C");
+  		addVirtualPad("FULL", "A_B_C");
 	}
 
 	override function update(elapsed:Float)
@@ -278,8 +278,8 @@ class StoryMenuState extends MusicBeatState
 				selectWeek();
 			}
 			else if(controls.RESET || _virtualpad.buttonC.justPressed)
-			{
-			    removeVirtualPad();
+ 			{
+ 			    removeVirtualPad();
 				persistentUpdate = false;
 				openSubState(new ResetScoreSubState('', curDifficulty, '', curWeek));
 				FlxG.sound.play(Paths.sound('scrollMenu'));

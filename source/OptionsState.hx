@@ -61,12 +61,13 @@ class OptionsState extends MusicBeatState
 		changeSelection();
 		
 		var tipText:FlxText = new FlxText(10, 12, 0, 'Press X to Go Mobile Controls Menu\nPress Y to Go In Extra Key Return Menu', 16);
-		tipText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		tipText.borderSize = 2;
-		tipText.scrollFactor.set();
-		add(tipText);
-
+ 		tipText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+ 		tipText.borderSize = 2;
+ 		tipText.scrollFactor.set();
+ 		add(tipText);
+ 
         addVirtualPad("UP_DOWN", "A_B_X_Y");
+
 		super.create();
 	}
 
@@ -75,8 +76,8 @@ class OptionsState extends MusicBeatState
 		ClientPrefs.saveSettings();
 		changeSelection();
 		removeVirtualPad();
- 		addVirtualPad("UP_DOWN", "A_B_X_Y");
- 		persistentUpdate = true;
+  		addVirtualPad("UP_DOWN", "A_B_X_Y");
+  		persistentUpdate = true;
 	}
 
 	override function update(elapsed:Float) {
@@ -90,16 +91,16 @@ class OptionsState extends MusicBeatState
 		}
 		
 		if (_virtualpad.buttonX.justPressed) {
- 			persistentUpdate = false;
- 			removeVirtualPad();
- 			openSubState(new MobileControlSelectSubState());
- 		}
- 		
- 		if (_virtualpad.buttonY.justPressed) {
- 			persistentUpdate = false;
- 			removeVirtualPad();
- 			openSubState(new MobileExtraControl());
- 		}
+  			persistentUpdate = false;
+  			removeVirtualPad();
+  			openSubState(new MobileControlSelectSubState());
+  		}
+  		
+  		if (_virtualpad.buttonY.justPressed) {
+  			persistentUpdate = false;
+  			removeVirtualPad();
+  			openSubState(new MobileExtraControl());
+  		}
 
 		if (controls.BACK) {
 			FlxG.sound.play(Paths.sound('cancelMenu'));
@@ -108,7 +109,7 @@ class OptionsState extends MusicBeatState
 
 		if (controls.ACCEPT) {
 		    persistentUpdate = false;
-		    removeVirtualPad();
+ 		    removeVirtualPad();
 			for (item in grpOptions.members) {
 				item.alpha = 0;
 			}
@@ -196,9 +197,9 @@ class NotesSubstate extends MusicBeatSubstate
 
 			var newShader:ColorSwap = new ColorSwap();
 			note.shader = newShader.shader;
-			for (type in 0...3) {
-				newShader.update(ClientPrefs.arrowHSV[i][type], type);
-			}
+			newShader.hue = ClientPrefs.arrowHSV[i][0] / 360;
+			newShader.saturation = ClientPrefs.arrowHSV[i][1] / 100;
+			newShader.brightness = ClientPrefs.arrowHSV[i][2] / 100;
 			shaderArray.push(newShader);
 		}
 		hsvText = new Alphabet(0, 0, "Hue    Saturation  Brightness", false, false, 0, 0.65);
@@ -384,7 +385,11 @@ class NotesSubstate extends MusicBeatSubstate
 	function resetValue(selected:Int, type:Int) {
 		curValue = 0;
 		ClientPrefs.arrowHSV[selected][type] = 0;
-		shaderArray[selected].update(0, type);
+		switch(type) {
+			case 0: shaderArray[selected].hue = 0;
+			case 1: shaderArray[selected].saturation = 0;
+			case 2: shaderArray[selected].brightness = 0;
+		}
 		grpNumbers.members[(selected * 3) + type].changeText('0');
 	}
 	function updateValue(change:Float = 0) {
@@ -401,9 +406,13 @@ class NotesSubstate extends MusicBeatSubstate
 			curValue = max;
 		}
 		roundedValue = Math.round(curValue);
-
 		ClientPrefs.arrowHSV[curSelected][typeSelected] = roundedValue;
-		shaderArray[curSelected].update(roundedValue, typeSelected);
+
+		switch(typeSelected) {
+			case 0: shaderArray[curSelected].hue = roundedValue / 360;
+			case 1: shaderArray[curSelected].saturation = roundedValue / 100;
+			case 2: shaderArray[curSelected].brightness = roundedValue / 100;
+		}
 		grpNumbers.members[(curSelected * 3) + typeSelected].changeText(Std.string(roundedValue));
 	}
 }
@@ -688,12 +697,12 @@ class PreferencesSubstate extends MusicBeatSubstate
 	static var noCheckbox:Array<String> = [
 		'Framerate',
 		'Note Delay',
- 		'VirtualPad Alpha',
- 		'Extra Controls',
- 		'Extra Control Location',
- 		'Hitbox Design',
- 		'Hitbox Opacity',
- 		'Storage Type'
+		'VirtualPad Alpha',
+  		'Extra Controls',
+  		'Extra Control Location',
+  		'Hitbox Design',
+  		'Hitbox Opacity',
+  		'Storage Type'
 	];
 	static var options:Array<String> = [
 		unselectableOptions[0],
@@ -705,14 +714,14 @@ class PreferencesSubstate extends MusicBeatSubstate
 		#end
 		unselectableOptions[1],
 		'Downscroll',
-		'Button Mashing',
+		'Ghost Tapping',
 		noCheckbox[1],
 		noCheckbox[2],
- 		noCheckbox[3],
- 		noCheckbox[4],
- 		noCheckbox[5],
- 		noCheckbox[6],
- 		noCheckbox[7],
+  		noCheckbox[3],
+  		noCheckbox[4],
+  		noCheckbox[5],
+  		noCheckbox[6],
+  		noCheckbox[7],
 		'Note Splashes',
 		'Hide HUD',
 		'Flashing Lights',
@@ -730,19 +739,19 @@ class PreferencesSubstate extends MusicBeatSubstate
 	private var characterLayer:FlxTypedGroup<Character>;
 	private var showCharacter:Character = null;
 	private var descText:FlxText;
-	
+
 	#if android
- 	var storageTypes:Array<String> = ["EXTERNAL_DATA", "EXTERNAL", "EXTERNAL_OBB", "EXTERNAL_MEDIA"];
- 	var externalPaths:Array<String> = StorageUtil.checkExternalPaths(true);
- 	final lastStorageType:String = ClientPrefs.storageType;
- 	#end
+  	var storageTypes:Array<String> = ["EXTERNAL_DATA", "EXTERNAL", "EXTERNAL_OBB", "EXTERNAL_MEDIA"];
+  	var externalPaths:Array<String> = StorageUtil.checkExternalPaths(true);
+  	final lastStorageType:String = ClientPrefs.storageType;
+  	#end
 
 	public function new()
 	{
 	    #if android
- 	    storageTypes = storageTypes.concat(externalPaths); //SD Card
- 	    #end
- 	    
+  	    storageTypes = storageTypes.concat(externalPaths); //SD Card
+  	    #end
+
 		super();
 		characterLayer = new FlxTypedGroup<Character>();
 		add(characterLayer);
@@ -882,10 +891,10 @@ class PreferencesSubstate extends MusicBeatSubstate
 
 					case 'Flashing Lights':
 						ClientPrefs.flashing = !ClientPrefs.flashing;
-						
+
 					case 'Wide Screen Mode':
- 						ClientPrefs.wideScreen = !ClientPrefs.wideScreen;
- 						FlxG.scaleMode = new MobileScaleMode();
+  						ClientPrefs.wideScreen = !ClientPrefs.wideScreen;
+  						FlxG.scaleMode = new MobileScaleMode();
 
 					case 'Violence':
 						ClientPrefs.violence = !ClientPrefs.violence;
@@ -896,8 +905,8 @@ class PreferencesSubstate extends MusicBeatSubstate
 					case 'Downscroll':
 						ClientPrefs.downScroll = !ClientPrefs.downScroll;
 
-					case 'Button Mashing':
-						ClientPrefs.buttonMashing = !ClientPrefs.buttonMashing;
+					case 'Ghost Tapping':
+						ClientPrefs.ghostTapping = !ClientPrefs.ghostTapping;
 
 					case 'Camera Zooms':
 						ClientPrefs.camZooms = !ClientPrefs.camZooms;
@@ -938,27 +947,27 @@ class PreferencesSubstate extends MusicBeatSubstate
 						ClientPrefs.noteOffset += add * mult;
 						if(ClientPrefs.noteOffset < 0) ClientPrefs.noteOffset = 0;
 						else if(ClientPrefs.noteOffset > 500) ClientPrefs.noteOffset = 500;
-						
-					//String
- 					case 'Hitbox Design':
- 					    createStringOption('hitboxtype', 'Gradient', ['Gradient', 'No Gradient' , 'No Gradient (Old)']);
- 					case 'Extra Control Location':
- 					    createStringOption('hitboxLocation', 'Bottom', ['Bottom', 'Top', 'Middle']);
- 					case 'Storage Type':
- 					    createStringOption('storageType', 'EXTERNAL_DATA', storageTypes);
- 					case 'VirtualPad Alpha':
- 						ClientPrefs.VirtualPadAlpha += addFloat;
- 						if(ClientPrefs.VirtualPadAlpha < 0) ClientPrefs.VirtualPadAlpha = 0;
- 						else if(ClientPrefs.VirtualPadAlpha > 1) ClientPrefs.VirtualPadAlpha = 1;
- 						_virtualpad.alpha = getValue('VirtualPadAlpha');
- 					case 'Hitbox Opacity':
- 						ClientPrefs.hitboxalpha += addFloat;
- 						if(ClientPrefs.hitboxalpha < 0) ClientPrefs.hitboxalpha = 0;
- 						else if(ClientPrefs.hitboxalpha > 1) ClientPrefs.hitboxalpha = 1;
- 					case 'Extra Controls':
- 						ClientPrefs.extraKeys += add;
- 						if(ClientPrefs.extraKeys < 0) ClientPrefs.extraKeys = 0;
- 						else if(ClientPrefs.extraKeys > 4) ClientPrefs.extraKeys = 4;
+
+						//String
+      					case 'Hitbox Design':
+      					    createStringOption('hitboxtype', 'Gradient', ['Gradient', 'No Gradient' , 'No Gradient (Old)']);
+      					case 'Extra Control Location':
+      					    createStringOption('hitboxLocation', 'Bottom', ['Bottom', 'Top', 'Middle']);
+      					case 'Storage Type':
+      					    createStringOption('storageType', 'EXTERNAL_DATA', storageTypes);
+      					case 'VirtualPad Alpha':
+      						ClientPrefs.VirtualPadAlpha += addFloat;
+      						if(ClientPrefs.VirtualPadAlpha < 0) ClientPrefs.VirtualPadAlpha = 0;
+      						else if(ClientPrefs.VirtualPadAlpha > 1) ClientPrefs.VirtualPadAlpha = 1;
+      						_virtualpad.alpha = getValue('VirtualPadAlpha');
+      					case 'Hitbox Opacity':
+      						ClientPrefs.hitboxalpha += addFloat;
+      						if(ClientPrefs.hitboxalpha < 0) ClientPrefs.hitboxalpha = 0;
+      						else if(ClientPrefs.hitboxalpha > 1) ClientPrefs.hitboxalpha = 1;
+      					case 'Extra Controls':
+      						ClientPrefs.extraKeys += add;
+      						if(ClientPrefs.extraKeys < 0) ClientPrefs.extraKeys = 0;
+      						else if(ClientPrefs.extraKeys > 4) ClientPrefs.extraKeys = 4;
 				}
 				reloadValues();
 
@@ -978,19 +987,19 @@ class PreferencesSubstate extends MusicBeatSubstate
 		}
 		super.update(elapsed);
 	}
-	
+
 	dynamic public function getValue(variable:String):Dynamic
- 	{
- 		var value = Reflect.getProperty(ClientPrefs, variable);
- 		return value;
- 	}
- 	
- 	dynamic public function setValue(value:Dynamic, variable:String)
- 	{
- 		return Reflect.setProperty(ClientPrefs, variable, value);
- 	}
- 	
- 	function createStringOption(variable:String, defaultValue:Dynamic, curOptionArray:Array<String> = null) {
+  	{
+  		var value = Reflect.getProperty(ClientPrefs, variable);
+  		return value;
+  	}
+  	
+  	dynamic public function setValue(value:Dynamic, variable:String)
+  	{
+  		return Reflect.setProperty(ClientPrefs, variable, value);
+  	}
+  	
+  	function createStringOption(variable:String, defaultValue:Dynamic, curOptionArray:Array<String> = null) {
     	var curOption:Int = 0;
     	try
         {
@@ -1002,12 +1011,12 @@ class PreferencesSubstate extends MusicBeatSubstate
         var num:Int = curOption; //lol
         if(controls.UI_LEFT_P) --num;
         else num++;
-             
+              
         if(num < 0)
         	num = curOptionArray.length - 1;
         else if(num >= curOptionArray.length)
         	num = 0;
-         
+
     	curOption = num;
     	setValue(curOptionArray[num], variable);
     }
@@ -1054,8 +1063,8 @@ class PreferencesSubstate extends MusicBeatSubstate
 				daText = "If unchecked, disables anti-aliasing, increases performance\nat the cost of the graphics not looking as smooth.";
 			case 'Downscroll':
 				daText = "If checked, notes go Down instead of Up, simple enough.";
-			case 'Button Mashing':
-				daText = "If checked, you only get misses from notes that get offscreen, also called as Ghost Tapping.";
+			case 'Ghost Tapping':
+				daText = "If checked, you won't get misses from pressing keys\nwhile there are no notes able to be hit.";
 			case 'Swearing':
 				daText = "If unchecked, your mom won't be angry at you.";
 			case 'Violence':
@@ -1116,15 +1125,15 @@ class PreferencesSubstate extends MusicBeatSubstate
 		}
 		FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
-	
+
 	#if android
- 	function onStorageChange():Void
- 	{
- 		File.saveContent(lime.system.System.applicationStorageDirectory + 'storagetype.txt', ClientPrefs.storageType);
- 	
- 		var lastStoragePath:String = StorageType.fromStrForce(lastStorageType) + '/';
- 	}
- 	#end
+  	function onStorageChange():Void
+  	{
+  		File.saveContent(lime.system.System.applicationStorageDirectory + 'storagetype.txt', ClientPrefs.storageType);
+  	
+  		var lastStoragePath:String = StorageType.fromStrForce(lastStorageType) + '/';
+  	}
+  	#end
 
 	function reloadValues() {
 		for (i in 0...checkboxArray.length) {
@@ -1144,8 +1153,8 @@ class PreferencesSubstate extends MusicBeatSubstate
 						daValue = ClientPrefs.flashing;
 					case 'Downscroll':
 						daValue = ClientPrefs.downScroll;
-					case 'Button Mashing':
-						daValue = ClientPrefs.buttonMashing;
+					case 'Ghost Tapping':
+						daValue = ClientPrefs.ghostTapping;
 					case 'Swearing':
 						daValue = ClientPrefs.cursing;
 					case 'Violence':
@@ -1155,7 +1164,7 @@ class PreferencesSubstate extends MusicBeatSubstate
 					case 'Hide HUD':
 						daValue = ClientPrefs.hideHud;
 					case 'Wide Screen Mode':
- 						daValue = ClientPrefs.wideScreen;
+  						daValue = ClientPrefs.wideScreen;
 					case 'Persistent Cached Data':
 						daValue = ClientPrefs.imagesPersist;
 				}
@@ -1169,20 +1178,20 @@ class PreferencesSubstate extends MusicBeatSubstate
 				switch(options[textNumber[i]]) {
 					case 'Framerate':
 						daText = '' + ClientPrefs.framerate;
-					case 'VirtualPad Alpha':
- 						daText = '' + ClientPrefs.VirtualPadAlpha;
- 					case 'Extra Controls':
- 						daText = '' + ClientPrefs.extraKeys;
- 					case 'Hitbox Opacity':
- 						daText = '' + ClientPrefs.hitboxalpha;
- 					case 'Hitbox Design':
- 						daText = '' + ClientPrefs.hitboxtype;
 					case 'Note Delay':
 						daText = ClientPrefs.noteOffset + 'ms';
-					case 'Extra Control Location':
- 						daText = '' + ClientPrefs.hitboxLocation;
- 					case 'Storage Type':
- 						daText = '' + ClientPrefs.storageType;
+					case 'VirtualPad Alpha':
+  						daText = '' + ClientPrefs.VirtualPadAlpha;
+  					case 'Extra Controls':
+  						daText = '' + ClientPrefs.extraKeys;
+  					case 'Hitbox Opacity':
+  						daText = '' + ClientPrefs.hitboxalpha;
+  					case 'Hitbox Design':
+  						daText = '' + ClientPrefs.hitboxtype;
+  					case 'Extra Control Location':
+  						daText = '' + ClientPrefs.hitboxLocation;
+  					case 'Storage Type':
+  						daText = '' + ClientPrefs.storageType;
 				}
 				var lastTracker:FlxSprite = text.sprTracker;
 				text.sprTracker = null;
@@ -1202,15 +1211,15 @@ class PreferencesSubstate extends MusicBeatSubstate
 	}
 	
 	override public function destroy() {
- 		super.destroy();
- 		
- 		#if android
- 		if (ClientPrefs.storageType != lastStorageType) {
- 			onStorageChange();
- 			ClientPrefs.saveSettings();
- 			CoolUtil.showPopUp('Storage Type has been changed and you needed restart the game!!\nPress OK to close the game.', 'Notice!');
- 			lime.system.System.exit(0);
- 		}
- 		#end
- 	}
+  		super.destroy();
+  		
+  		#if android
+  		if (ClientPrefs.storageType != lastStorageType) {
+  			onStorageChange();
+  			ClientPrefs.saveSettings();
+  			CoolUtil.showPopUp('Storage Type has been changed and you needed restart the game!!\nPress OK to close the game.', 'Notice!');
+  			lime.system.System.exit(0);
+  		}
+  		#end
+  	}
 }

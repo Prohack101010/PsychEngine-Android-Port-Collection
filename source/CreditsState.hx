@@ -25,8 +25,8 @@ class CreditsState extends MusicBeatState
 
 	private static var creditsStuff:Array<Dynamic> = [ //Name - Icon name - Description - Link - BG Color
 	    ['Android Porter'],
-		['KralOyuncu 2010x',		'KralOyuncu',		'Porter of Psych Engine 0.3 Android\nCheck My Psych Android Port Collection',					'https://youtube.com/@kraloyuncurbx',	0xFFFFBB1B],
-		[''],
+ 		['KralOyuncu 2010x',		'KralOyuncu',		'Porter of Psych Engine 0.3 Android\nCheck My Psych Android Port Collection',					'https://youtube.com/@kraloyuncurbx',	0xFFFFBB1B],
+ 		[''],
 		['Psych Engine Team'],
 		['Shadow Mario',		'shadowmario',		'Main Programmer of Psych Engine',					'https://twitter.com/Shadow_Mario_',	0xFFFFDD33],
 		['RiverOaken',			'riveroaken',		'Main Artist/Animator of Psych Engine',				'https://twitter.com/river_oaken',		0xFFC30085],
@@ -74,7 +74,7 @@ class CreditsState extends MusicBeatState
 			grpOptions.add(optionText);
 
 			if(isSelectable) {
-				var icon:AttachedSprite = new AttachedSprite(Paths.image('credits/' + creditsStuff[i][1]));
+				var icon:AttachedSprite = new AttachedSprite('credits/' + creditsStuff[i][1]);
 				icon.xAdd = optionText.width + 10;
 				icon.sprTracker = optionText;
 	
@@ -167,14 +167,6 @@ class CreditsState extends MusicBeatState
 				item.alpha = 0.6;
 				if (item.targetY == 0) {
 					item.alpha = 1;
-				}
-
-				for (j in 0...iconArray.length) {
-					var tracker:FlxSprite = iconArray[j].sprTracker;
-					if(tracker == item) {
-						iconArray[j].alpha = item.alpha;
-						break;
-					}
 				}
 			}
 		}

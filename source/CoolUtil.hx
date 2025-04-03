@@ -6,6 +6,9 @@ import lime.utils.Assets as LimeAssets;
 import lime.utils.AssetLibrary;
 import lime.utils.AssetManifest;
 import flixel.util.FlxSave;
+#if sys
+import sys.io.File;
+#end
 
 using StringTools;
 
@@ -32,7 +35,11 @@ class CoolUtil
 
 	public static function coolTextFile(path:String):Array<String>
 	{
+		#if sys
+		var daList:Array<String> = File.getContent(path).trim().split('\n');
+		#else
 		var daList:Array<String> = Assets.getText(path).trim().split('\n');
+		#end
 
 		for (i in 0...daList.length)
 		{
@@ -68,34 +75,34 @@ class CoolUtil
 	}
 	
 	/** Quick Function to Fix Save Files for Flixel 5
-		if you are making a mod, you are gonna wanna change "ShadowMario" to something else
-		so Base Psych saves won't conflict with yours
-		@BeastlyGabi
-	**/
-	public static function getSavePath(folder:String = 'KralOyuncu'):String {
-		@:privateAccess
-		return #if (flixel < "5.0.0") folder #else FlxG.stage.application.meta.get('company')
-			+ '/'
-			+ FlxSave.validate(FlxG.stage.application.meta.get('file')) #end;
-	}
-	
-	inline public static function colorFromString(color:String):FlxColor
-	{
-		var hideChars = ~/[\t\n\r]/;
-		var color:String = hideChars.split(color).join('').trim();
-		if(color.startsWith('0x')) color = color.substring(color.length - 6);
-
-		var colorNum:Null<FlxColor> = FlxColor.fromString(color);
-		if(colorNum == null) colorNum = FlxColor.fromString('#$color');
-		return colorNum != null ? colorNum : FlxColor.WHITE;
-	}
-	
-	public static function showPopUp(message:String, title:String):Void
- 	{
- 		#if android
- 		AndroidTools.showAlertDialog(title, message, {name: "OK", func: null}, null);
- 		#else
- 		FlxG.stage.window.alert(message, title);
- 		#end
+ 		if you are making a mod, you are gonna wanna change "ShadowMario" to something else
+ 		so Base Psych saves won't conflict with yours
+ 		@BeastlyGabi
+ 	**/
+ 	public static function getSavePath(folder:String = 'KralOyuncu'):String {
+ 		@:privateAccess
+ 		return #if (flixel < "5.0.0") folder #else FlxG.stage.application.meta.get('company')
+ 			+ '/'
+ 			+ FlxSave.validate(FlxG.stage.application.meta.get('file')) #end;
  	}
+ 	
+ 	inline public static function colorFromString(color:String):FlxColor
+ 	{
+ 		var hideChars = ~/[\t\n\r]/;
+ 		var color:String = hideChars.split(color).join('').trim();
+ 		if(color.startsWith('0x')) color = color.substring(color.length - 6);
+ 
+ 		var colorNum:Null<FlxColor> = FlxColor.fromString(color);
+ 		if(colorNum == null) colorNum = FlxColor.fromString('#$color');
+ 		return colorNum != null ? colorNum : FlxColor.WHITE;
+ 	}
+ 	
+ 	public static function showPopUp(message:String, title:String):Void
+  	{
+  		#if android
+  		AndroidTools.showAlertDialog(title, message, {name: "OK", func: null}, null);
+  		#else
+  		FlxG.stage.window.alert(message, title);
+  		#end
+  	}
 }

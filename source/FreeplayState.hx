@@ -172,23 +172,23 @@ class FreeplayState extends MusicBeatState
 		add(text);
 		
 		#if PRELOAD_ALL
-		addVirtualPad("FULL", "A_B_X_Y");
-		#else
-		addVirtualPad("FULL", "A_B_C");
-		#end
+ 		addVirtualPad("FULL", "A_B_X_Y");
+ 		#else
+ 		addVirtualPad("FULL", "A_B_C");
+ 		#end
 		super.create();
 	}
 
 	override function closeSubState() {
 		changeSelection();
 		persistentUpdate = true;
-		super.closeSubState();
-		removeVirtualPad();
- 		#if PRELOAD_ALL
- 		addVirtualPad("FULL", "A_B_X_Y");
- 		#else
- 		addVirtualPad("FULL", "A_B_C");
- 		#end
+ 		super.closeSubState();
+ 		removeVirtualPad();
+  		#if PRELOAD_ALL
+  		addVirtualPad("FULL", "A_B_X_Y");
+  		#else
+  		addVirtualPad("FULL", "A_B_C");
+  		#end
 	}
 
 	public function addSong(songName:String, weekNum:Int, songCharacter:String)
@@ -304,9 +304,9 @@ class FreeplayState extends MusicBeatState
 			destroyFreeplayVocals();
 		}
 		else if(controls.RESET || #if PRELOAD_ALL _virtualpad.buttonY.justPressed #else _virtualpad.buttonC.justPressed #end)
-		{
-		    persistentUpdate = false;
- 		    removeVirtualPad();
+ 		{
+ 		    persistentUpdate = false;
+  		    removeVirtualPad();
 			openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter));
 			FlxG.sound.play(Paths.sound('scrollMenu'));
 		}

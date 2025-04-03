@@ -112,8 +112,9 @@ class PauseSubState extends MusicBeatSubstate
 		changeSelection();
 
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-		
+
 		addVirtualPad("UP_DOWN", "A");
+		addVirtualPadCamera();
 	}
 
 	override function update(elapsed:Float)
@@ -168,10 +169,10 @@ class PauseSubState extends MusicBeatSubstate
 					MusicBeatState.resetState();
 					FlxG.sound.music.volume = 0;
 				case 'Chart Editor':
-					FlxG.switchState(new ChartingState());
-				case "Character Editor":
-        			PlayState.storyWeek = 6; //For loading week 6 assets
-        			LoadingState.loadAndSwitchState(new CharacterEditorState(PlayState.SONG.player2), true);
+ 					FlxG.switchState(new ChartingState());
+ 				case "Character Editor":
+         			PlayState.storyWeek = 6; //For loading week 6 assets
+         			LoadingState.loadAndSwitchState(new CharacterEditorState(PlayState.SONG.player2), true);
 				case 'Botplay':
 					PlayState.cpuControlled = !PlayState.cpuControlled;
 					PlayState.usedPractice = true;
