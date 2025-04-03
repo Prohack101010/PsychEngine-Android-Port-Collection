@@ -28,7 +28,7 @@ import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import openfl.events.MouseEvent;
-import openfl.geom.Point;
+ import openfl.geom.Point;
 import haxe.Json;
 import Character;
 import flixel.system.debug.interaction.tools.Pointer.GraphicCursorCross;
@@ -76,7 +76,7 @@ class CharacterEditorState extends MusicBeatState
 	var healthBarBG:FlxSprite;
 
 	var cameraPosition:Point = new Point();
-    var isDragging:Bool = false;
+	var isDragging:Bool = false;
 
 	override function create()
 	{
@@ -110,7 +110,7 @@ class CharacterEditorState extends MusicBeatState
 			onPixelBG = !onPixelBG;
 			reloadBGs();
 		});
-		changeBGbutton.cameras = [camHUD];
+		changeBGbutton.cameras = [camMenu];
 
 		loadChar(!daAnim.startsWith('bf'), false);
 
@@ -126,6 +126,7 @@ class CharacterEditorState extends MusicBeatState
 
 		dumbTexts = new FlxTypedGroup<FlxText>();
 		add(dumbTexts);
+		dumbTexts.cameras = [camHUD];
 
 		textAnim = new FlxText(300, 16);
 		textAnim.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -142,17 +143,17 @@ class CharacterEditorState extends MusicBeatState
 		add(camFollow);
 
 		final buttonESC:String = #if mobile 'B' #else 'ESC' #end;
-		final buttonEQ:String = #if mobile 'X/Y' #else 'E/Q' #end;
-		final buttonR:String = #if mobile 'Z' #else 'R' #end;
-		final buttonWS:String = #if mobile 'V/D' #else 'W/S' #end;
-		final buttonT:String = #if mobile 'A' #else 'T' #end;
-		final buttonShift:String = #if mobile 'C' #else 'Shift' #end;
-
-		var tipText:FlxText = new FlxText(FlxG.width - 20, FlxG.height - 5, 0,
+ 		final buttonEQ:String = #if mobile 'X/Y' #else 'E/Q' #end;
+ 		final buttonR:String = #if mobile 'Z' #else 'R' #end;
+ 		final buttonWS:String = #if mobile 'V/D' #else 'W/S' #end;
+ 		final buttonT:String = #if mobile 'A' #else 'T' #end;
+ 		final buttonShift:String = #if mobile 'C' #else 'Shift' #end;
+ 
+ 		var tipText:FlxText = new FlxText(FlxG.width - 20, FlxG.height - 5, 0,
 			'$buttonESC - Go back to the Game
-			\n$buttonEQ - Camera Zoom In/Out
+ 			\n$buttonEQ - Camera Zoom In/Out
 			\nJKLI - Move Camera
-
+			
 			\n$buttonWS - Previous/Next Animation
 			\nSpace - Play Animation
 			\nArrow Keys - Move Character Offset
@@ -172,7 +173,7 @@ class CharacterEditorState extends MusicBeatState
 		];
 
 		UI_box = new FlxUITabMenu(null, tabs, true);
-		UI_box.cameras = [camHUD];
+		UI_box.cameras = [camMenu];
 
 		UI_box.resize(250, 120);
 		UI_box.x = FlxG.width - 275;
@@ -184,7 +185,7 @@ class CharacterEditorState extends MusicBeatState
 			{name: 'Animations', label: 'Animations'},
 		];
 		UI_characterbox = new FlxUITabMenu(null, tabs, true);
-		UI_characterbox.cameras = [camHUD];
+		UI_characterbox.cameras = [camMenu];
 
 		UI_characterbox.resize(350, 250);
 		UI_characterbox.x = UI_box.x - 100;
@@ -205,13 +206,13 @@ class CharacterEditorState extends MusicBeatState
 		reloadCharacterOptions();
 
 		addVirtualPad("FULL", "A_B_C_D_V_X_Y_Z");
-		addVirtualPadCamera();
-
-		#if mobile
-		FlxG.stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseEvent);
-		FlxG.stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseEvent);
-		FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseEvent);
-		#end
+ 		addVirtualPadCamera();
+ 
+ 		#if mobile
+ 		FlxG.stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseEvent);
+ 		FlxG.stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseEvent);
+ 		FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseEvent);
+ 		#end
 
 		super.create();
 	}
@@ -874,17 +875,14 @@ class CharacterEditorState extends MusicBeatState
 					inputTexts[i].text = ClipboardAdd(inputTexts[i].text);
 					inputTexts[i].caretIndex = inputTexts[i].text.length;
 					getEvent(FlxUIInputText.CHANGE_EVENT, inputTexts[i], null, []);
-					FlxG.sound.muteKeys = [];
-					FlxG.sound.volumeDownKeys = [];
-					FlxG.sound.volumeUpKeys = [];
 				}
 				if(FlxG.keys.justPressed.ENTER) {
 					inputTexts[i].hasFocus = false;
 				}
 				*/
 				FlxG.sound.muteKeys = [];
- 				FlxG.sound.volumeDownKeys = [];
- 				FlxG.sound.volumeUpKeys = [];
+				FlxG.sound.volumeDownKeys = [];
+				FlxG.sound.volumeUpKeys = [];
 				super.update(elapsed);
 				return;
 			}
@@ -901,10 +899,10 @@ class CharacterEditorState extends MusicBeatState
 			}
 
 			if (_virtualpad.buttonZ.justPressed || FlxG.keys.justPressed.R) {
-  				FlxG.camera.zoom = 1;
-  			}
- 
- 			if ((_virtualpad.buttonX.pressed || FlxG.keys.pressed.E) && FlxG.camera.zoom < 5) {
+   				FlxG.camera.zoom = 1;
+   			}
+  
+  			if ((_virtualpad.buttonX.pressed || FlxG.keys.pressed.E) && FlxG.camera.zoom < 5) {
 				FlxG.camera.zoom += elapsed * FlxG.camera.zoom;
 				if(FlxG.camera.zoom > 5) FlxG.camera.zoom = 5;
 			}
@@ -961,19 +959,19 @@ class CharacterEditorState extends MusicBeatState
 					genBoyOffsets();
 				}
 				if (_virtualpad.buttonA.justPressed || FlxG.keys.justPressed.T)
-  				{
-  					char.animationsArray[curAnim].offsets = [0, 0];
+   				{
+   					char.animationsArray[curAnim].offsets = [0, 0];
+   
+   					char.addOffset(char.animationsArray[curAnim].anim, char.animationsArray[curAnim].offsets[0], char.animationsArray[curAnim].offsets[1]);
+   					genBoyOffsets();
+   				}
   
-  					char.addOffset(char.animationsArray[curAnim].anim, char.animationsArray[curAnim].offsets[0], char.animationsArray[curAnim].offsets[1]);
-  					genBoyOffsets();
-  				}
- 
-  				var controlArray:Array<Bool> = [
-  				    _virtualpad.buttonLeft.justPressed || FlxG.keys.justPressed.LEFT, 
-  				    _virtualpad.buttonRight.justPressed || FlxG.keys.justPressed.RIGHT, 
-  				    _virtualpad.buttonUp.justPressed || FlxG.keys.justPressed.UP, 
-  				    _virtualpad.buttonDown.justPressed || FlxG.keys.justPressed.DOWN
-  				];
+   				var controlArray:Array<Bool> = [
+   				    _virtualpad.buttonLeft.justPressed || FlxG.keys.justPressed.LEFT, 
+   				    _virtualpad.buttonRight.justPressed || FlxG.keys.justPressed.RIGHT, 
+   				    _virtualpad.buttonUp.justPressed || FlxG.keys.justPressed.UP, 
+   				    _virtualpad.buttonDown.justPressed || FlxG.keys.justPressed.DOWN
+   				];
 
 				for (i in 0...controlArray.length) {
 					if(controlArray[i]) {
@@ -1061,7 +1059,8 @@ class CharacterEditorState extends MusicBeatState
 			"camera_position": char.cameraPosition,
 		
 			"flip_x": char.originalFlipX,
-			"no_antialiasing": char.noAntialiasing
+			"no_antialiasing": char.noAntialiasing,
+			"healthbar_colors": char.healthColorArray
 		};
 
 		var data:String = Json.stringify(json, "\t");
@@ -1087,23 +1086,23 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	function onMouseEvent(e:MouseEvent):Void
-	{
-		if (_virtualpad != null /* && !anyPressed() */) //`!anyPressed()` is buggy
-			switch (e.type)
-			{
-				case MouseEvent.MOUSE_DOWN:
-					var mouse = new Point(e.stageX, e.stageY); // OpenFL mouse position
-					cameraPosition.x = camFollow.x + mouse.x;
-					cameraPosition.y = camFollow.y + mouse.y;
-					isDragging = true;
-
-				case MouseEvent.MOUSE_MOVE if (isDragging):
-					var mouse = new Point(e.stageX, e.stageY);
-					camFollow.x = cameraPosition.x - mouse.x;
-					camFollow.y = cameraPosition.y - mouse.y;
-
-				case MouseEvent.MOUSE_UP:
-					isDragging = false;
-			}
-	}
+ 	{
+ 		if (_virtualpad != null /* && !anyPressed() */) //`!anyPressed()` is buggy
+ 			switch (e.type)
+ 			{
+ 				case MouseEvent.MOUSE_DOWN:
+ 					var mouse = new Point(e.stageX, e.stageY); // OpenFL mouse position
+ 					cameraPosition.x = camFollow.x + mouse.x;
+ 					cameraPosition.y = camFollow.y + mouse.y;
+ 					isDragging = true;
+ 
+ 				case MouseEvent.MOUSE_MOVE if (isDragging):
+ 					var mouse = new Point(e.stageX, e.stageY);
+ 					camFollow.x = cameraPosition.x - mouse.x;
+ 					camFollow.y = cameraPosition.y - mouse.y;
+ 
+ 				case MouseEvent.MOUSE_UP:
+ 					isDragging = false;
+ 			}
+ 	}
 }
